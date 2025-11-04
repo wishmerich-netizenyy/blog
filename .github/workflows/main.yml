@@ -45,6 +45,9 @@ jobs:
       - name: Install dependencies
         run: npm install  # 运行 npm install
 
+      - name: Fix permissions
+        run: chmod +x ./node_modules/.bin/hexo
+
       # 第五步：生成静态网站
       - name: Build static website
         run: npm run build  # 运行 hexo g
