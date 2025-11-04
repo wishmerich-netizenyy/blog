@@ -47,7 +47,7 @@ jobs:
 
       # 第五步：生成静态网站
       - name: Build static website
-        run: ./node_modules/.bin/hexo generate  # 运行 hexo g
+        run: npm run build  # 运行 hexo g
 
       # 第六步：上传构建好的文件 (artifact)
       - name: Upload artifact
