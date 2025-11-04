@@ -1,0 +1,61 @@
+# GitHub Actions for Hexo Blog Deployment
+
+name: Build and Deploy Hexo
+
+on:
+  # 监视 main 分支的 push 操作
+  push:
+    branches:
+      - main
+
+# 授予工作流写入 GitHub Pages 的权限
+permissions:
+  contents: read
+  pages: write      # 允许 Actions 写入 GitHub Pages
+  id-token: write   # 允许 Actions 获取 OIDC 令牌
+
+# 只允许一个并发部署，自动取消正在进行的旧部署
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # 使用最新的 Ubuntu 系统
+    steps:
+      # 第一步：检出您的源码
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          submodules: true # 如果您的主题是 git submodule，需要这个
+          fetch-depth: 0   # 获取所有历史记录，以便 last-modified 生效
+
+      # 第二步：设置 Node.js 环境
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'  # 使用 Node.js 20
+          cache: 'npm'      # 缓存 npm 依赖项以加快速度
+
+      # 第三步：配置 GitHub Pages
+      - name: Set up GitHub Pages
+        uses: actions/configure-pages@v4 # 官方配置 Pages 的 Action
+
+      # 第四步：安装 Hexo 依赖项
+      - name: Install dependencies
+        run: npm install  # 运行 npm install
+
+      # 第五步：生成静态网站
+      - name: Build static website
+        run: npx hexo generate  # 运行 hexo g
+
+      # 第六步：上传构建好的文件 (artifact)
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3 # 官方上传 Action
+        with:
+          path: ./public  # Hexo 生成的 public 目录
+
+      # 第七步：部署到 GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 # 官方部署 Action
